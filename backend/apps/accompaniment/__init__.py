@@ -1,0 +1,2 @@
+"""Accompaniment module."""
+
