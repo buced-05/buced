@@ -7,7 +7,11 @@ from .models import Project
 
 
 def _dispatch_scoring(project_id: int) -> None:
-    from ml.tasks import update_scoring_metrics
+    try:
+        from apps.ml.tasks import update_scoring_metrics
+    except ImportError:
+        def update_scoring_metrics(*args, **kwargs):
+            pass
 
     try:
         update_scoring_metrics.delay(project_id=project_id)

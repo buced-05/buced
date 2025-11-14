@@ -1,16 +1,34 @@
+import { Card, CardContent } from "../ui/card";
+import { useThemeStore } from "../../stores/theme";
+
 type StatCardProps = {
   title: string;
   value: string;
   description?: string;
 };
 
-const StatCard = ({ title, value, description }: StatCardProps) => (
-  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-    <p className="text-sm font-medium text-slate-500">{title}</p>
-    <p className="mt-2 text-2xl font-semibold text-slate-900">{value}</p>
-    {description ? <p className="mt-1 text-xs text-slate-400">{description}</p> : null}
-  </div>
-);
+const StatCard = ({ title, value, description }: StatCardProps) => {
+  const { theme } = useThemeStore();
+  
+  return (
+    <Card className={`hover:border-neon-purple/50 ${
+      theme === "dark"
+        ? "border-neon-cyan/30 bg-[#1A1A2E]"
+        : "border-gray-200 bg-white"
+    }`}>
+      <CardContent className="p-6">
+        <p className={`text-sm font-semibold mb-2 ${
+          theme === "dark" ? "text-gray-400" : "text-gray-600"
+        }`}>{title}</p>
+        <p className="text-3xl font-black gradient-text">{value}</p>
+        {description ? (
+          <p className={`mt-2 text-xs font-medium ${
+            theme === "dark" ? "text-gray-500" : "text-gray-600"
+          }`}>{description}</p>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+};
 
 export default StatCard;
-

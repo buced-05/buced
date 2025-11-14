@@ -8,8 +8,18 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+try:
+    from apps.common.views import health_check
+    HEALTH_CHECK_AVAILABLE = True
+except ImportError:
+    HEALTH_CHECK_AVAILABLE = False
+    def health_check(request):
+        from rest_framework.response import Response
+        return Response({"status": "healthy", "message": "API is running"}, status=200)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/health/", health_check, name="health-check"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/swagger/",

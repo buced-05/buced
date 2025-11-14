@@ -19,12 +19,26 @@ env = environ.Env(
     REDIS_URL=(str, "redis://redis:6379/0"),
     DJANGO_ALLOWED_HOSTS=(list, ["*"]),
     CORS_ALLOWED_ORIGINS=(list, []),
+    SECURE_SSL_REDIRECT=(bool, False),
 )
 
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DJANGO_DEBUG")
+
+# Sécurité en production
+if not DEBUG:
+    # HTTPS uniquement en production
+    SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=False, cast=bool)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_HSTS_SECONDS = 31536000  # 1 an
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
 
@@ -91,16 +105,36 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 ASGI_APPLICATION = "core.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB"),
-        "USER": env("POSTGRES_USER"),
-        "PASSWORD": env("POSTGRES_PASSWORD"),
-        "HOST": env("POSTGRES_HOST"),
-        "PORT": env("POSTGRES_PORT"),
+# Configuration de la base de données
+# Utilise SQLite par défaut si POSTGRES_HOST n'est pas configuré ou est "postgres" (Docker)
+# Pour utiliser PostgreSQL, définissez POSTGRES_HOST dans votre fichier .env
+# En production VPS, utilisez "localhost" pour PostgreSQL local
+POSTGRES_HOST = env("POSTGRES_HOST")
+USE_POSTGRES = POSTGRES_HOST and POSTGRES_HOST != "postgres"
+
+# En production, forcer PostgreSQL si DEBUG=False et POSTGRES_HOST est défini
+if not DEBUG and POSTGRES_HOST and POSTGRES_HOST != "postgres":
+    USE_POSTGRES = True
+
+if USE_POSTGRES:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("POSTGRES_DB"),
+            "USER": env("POSTGRES_USER"),
+            "PASSWORD": env("POSTGRES_PASSWORD"),
+            "HOST": POSTGRES_HOST,
+            "PORT": env("POSTGRES_PORT"),
+        }
     }
-}
+else:
+    # Utiliser SQLite pour le développement local
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -163,8 +197,25 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-CORS_ALLOW_ALL_ORIGINS = not bool(env("CORS_ALLOWED_ORIGINS"))
-CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
+CORS_ALLOW_ALL_ORIGINS = DEBUG or not bool(env("CORS_ALLOWED_ORIGINS"))
+CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS") if env("CORS_ALLOWED_ORIGINS") else [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 CHANNEL_LAYERS = {
     "default": {

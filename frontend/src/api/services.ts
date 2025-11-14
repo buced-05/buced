@@ -38,25 +38,29 @@ const mapParams = ({ page, pageSize, ordering, search, filters = {} }: ListParam
 
 export const projectsService = {
   list: async (params?: ListParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<Project>>('/projects/items/', {
+    const { data } = await apiClient.get<PaginatedResponse<Project>>('/v1/projects/items/', {
       params: mapParams(params),
     })
     return data
   },
   retrieve: async (id: number | string) => {
-    const { data } = await apiClient.get<Project>(`/projects/items/${id}/`)
+    const { data } = await apiClient.get<Project>(`/v1/projects/items/${id}/`)
+    return data
+  },
+  create: async (projectData: Partial<Project>) => {
+    const { data } = await apiClient.post<Project>('/v1/projects/items/', projectData)
     return data
   },
   statistics: async () => {
-    const { data } = await apiClient.get<ProjectsStatistics>('/projects/items/statistics/')
+    const { data } = await apiClient.get<ProjectsStatistics>('/v1/projects/items/statistics/')
     return data
   },
   topSelection: async () => {
-    const { data } = await apiClient.get<Project[]>('/projects/items/top-selection/')
+    const { data } = await apiClient.get<Project[]>('/v1/projects/items/top-selection/')
     return data
   },
   assignTeam: async (id: number, teamIds: number[]) => {
-    const { data } = await apiClient.post<Project>(`/projects/items/${id}/assign-team/`, {
+    const { data } = await apiClient.post<Project>(`/v1/projects/items/${id}/assign-team/`, {
       team_ids: teamIds,
     })
     return data
@@ -65,60 +69,67 @@ export const projectsService = {
 
 export const votesService = {
   list: async (params?: ListParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<Vote>>('/votes/community/', {
+    const { data } = await apiClient.get<PaginatedResponse<Vote>>('/v1/votes/community/', {
       params: mapParams(params),
     })
     return data
   },
   submit: async (payload: { project: number; rating: number; comment: string }) => {
-    const { data } = await apiClient.post<Vote>('/votes/community/', payload)
+    const { data } = await apiClient.post<Vote>('/v1/votes/community/', payload)
     return data
   },
+  delete: async (voteId: number) => {
+    await apiClient.delete(`/v1/votes/community/${voteId}/`)
+  },
   evaluation: async (projectId: number) => {
-    const { data } = await apiClient.get<EvaluationResult>(`/votes/evaluations/${projectId}/`)
+    const { data } = await apiClient.get<EvaluationResult>(`/v1/votes/evaluations/${projectId}/`)
     return data
   },
 }
 
 export const mlService = {
   sentiments: async (projectId: number) => {
-    const { data } = await apiClient.get<PaginatedResponse<SentimentAnalysisResult>>('/ml/sentiment/', {
+    const { data } = await apiClient.get<PaginatedResponse<SentimentAnalysisResult>>('/v1/ml/sentiment/', {
       params: { project: projectId },
     })
     return data
   },
   runSentiment: async (projectId: number) => {
-    await apiClient.post('/ml/sentiment/run/', { project_id: projectId })
+    await apiClient.post('/v1/ml/sentiment/run/', { project_id: projectId })
   },
   recommendations: async () => {
-    const { data } = await apiClient.get<PaginatedResponse<Recommendation>>('/ml/recommendations/')
+    const { data } = await apiClient.get<PaginatedResponse<Recommendation>>('/v1/ml/recommendations/')
     return data
   },
   refreshRecommendations: async () => {
-    await apiClient.post('/ml/recommendations/refresh/', {})
+    await apiClient.post('/v1/ml/recommendations/refresh/', {})
   },
 }
 
 export const orientationService = {
   listRequests: async (params?: ListParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<OrientationRequest>>('/orientation/requests/', {
+    const { data } = await apiClient.get<PaginatedResponse<OrientationRequest>>('/v1/orientation/requests/', {
       params: mapParams(params),
     })
     return data
   },
   createRequest: async (payload: Pick<OrientationRequest, 'topic' | 'context'>) => {
-    const { data } = await apiClient.post<OrientationRequest>('/orientation/requests/', payload)
+    const { data } = await apiClient.post<OrientationRequest>('/v1/orientation/requests/', payload)
     return data
   },
   listResources: async () => {
-    const { data } = await apiClient.get<PaginatedResponse<Resource>>('/orientation/resources/')
+    const { data } = await apiClient.get<PaginatedResponse<Resource>>('/v1/orientation/resources/')
+    return data
+  },
+  createResource: async (payload: Pick<Resource, 'title' | 'category' | 'description' | 'url'>) => {
+    const { data } = await apiClient.post<Resource>('/v1/orientation/resources/', payload)
     return data
   },
 }
 
 export const prototypingService = {
   listSprints: async (params?: ListParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<PrototypeSprint>>('/prototyping/sprints/', {
+    const { data } = await apiClient.get<PaginatedResponse<PrototypeSprint>>('/v1/prototyping/sprints/', {
       params: mapParams(params),
     })
     return data
@@ -127,14 +138,14 @@ export const prototypingService = {
 
 export const sponsorsService = {
   profiles: async () => {
-    const { data } = await apiClient.get<PaginatedResponse<SponsorProfile>>('/sponsors/profiles/')
+    const { data } = await apiClient.get<PaginatedResponse<SponsorProfile>>('/v1/sponsors/profiles/')
     return data
   },
 }
 
 export const accompagnementService = {
   mentorships: async (params?: ListParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<Mentorship>>('/accompagnement/mentorships/', {
+    const { data } = await apiClient.get<PaginatedResponse<Mentorship>>('/v1/accompagnement/mentorships/', {
       params: mapParams(params),
     })
     return data
@@ -143,14 +154,14 @@ export const accompagnementService = {
 
 export const notificationsService = {
   list: async () => {
-    const { data } = await apiClient.get<PaginatedResponse<Notification>>('/notifications/')
+    const { data } = await apiClient.get<PaginatedResponse<Notification>>('/v1/notifications/')
     return data
   },
 }
 
 export const budgetService = {
   lines: async (mentorshipId: number) => {
-    const { data } = await apiClient.get<PaginatedResponse<BudgetLine>>('/accompagnement/budgets/', {
+    const { data } = await apiClient.get<PaginatedResponse<BudgetLine>>('/v1/accompagnement/budgets/', {
       params: { mentorship: mentorshipId },
     })
     return data

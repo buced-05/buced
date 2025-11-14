@@ -17,7 +17,10 @@ class User(AbstractUser):
         default=Roles.STUDENT,
     )
     establishment = models.CharField(max_length=255, blank=True)
-    avatar = models.URLField(blank=True)
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    cover_photo = models.ImageField(upload_to="cover_photos/", blank=True, null=True)
+    bio = models.TextField(blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
 
     class Meta:
         constraints = [

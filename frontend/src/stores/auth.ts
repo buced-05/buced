@@ -30,9 +30,28 @@ export const useAuthStore = create<AuthState>()(
       login: async ({ username, password }) => {
         set({ isAuthenticating: true })
         try {
-          const { data } = await apiClient.post('/auth/token/', { username, password })
+          // Le backend accepte email grâce au EmailTokenObtainPairSerializer
+          // On peut envoyer username (qui peut être un email) ou email
+          const payload: Record<string, string> = { password };
+          
+          // Si username ressemble à un email, utiliser 'email', sinon 'username'
+          if (username.includes('@')) {
+            payload.email = username.trim().toLowerCase();
+          } else {
+            payload.username = username.trim();
+          }
+          
+          const { data } = await apiClient.post('/v1/auth/token/', payload)
+          
+          if (!data.access || !data.refresh) {
+            throw new Error('Tokens manquants dans la réponse')
+          }
+          
           set({ accessToken: data.access, refreshToken: data.refresh })
           await get().fetchProfile()
+        } catch (error) {
+          console.error('Erreur lors de la connexion:', error)
+          throw error
         } finally {
           set({ isAuthenticating: false })
         }
@@ -46,12 +65,12 @@ export const useAuthStore = create<AuthState>()(
           get().logout()
           return null
         }
-        const { data } = await apiClient.post('/auth/token/refresh/', { refresh })
+        const { data } = await apiClient.post('/v1/auth/token/refresh/', { refresh })
         set({ accessToken: data.access, refreshToken: data.refresh ?? refresh })
         return data.access as string
       },
       fetchProfile: async () => {
-        const { data } = await apiClient.get<User>('/auth/profile/')
+        const { data } = await apiClient.get<User>('/v1/auth/profile/')
         set({ user: data })
       },
     }),

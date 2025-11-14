@@ -9,6 +9,9 @@ export interface User {
   role: UserRole
   establishment?: string
   avatar?: string
+  cover_photo?: string
+  bio?: string
+  phone_number?: string
   date_joined: string
 }
 

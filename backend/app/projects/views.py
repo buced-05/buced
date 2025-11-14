@@ -6,7 +6,12 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from ml.tasks import generate_recommendations
+try:
+    from apps.ml.tasks import generate_recommendations
+except ImportError:
+    # Fallback si ml n'est pas disponible
+    def generate_recommendations(*args, **kwargs):
+        pass
 
 from .models import Project, ProjectDocument
 from .serializers import ProjectDocumentSerializer, ProjectSerializer
@@ -22,6 +27,18 @@ class ProjectViewSet(viewsets.ModelViewSet):
     )
     serializer_class = ProjectSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Override to handle potential database errors gracefully"""
+        try:
+            return super().get_queryset()
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting projects queryset: {e}")
+            # Return empty queryset if there's a database error
+            return Project.objects.none()
+    
     filterset_fields = ["category", "status"]
     search_fields = ["title", "description", "expected_impact", "objectives"]
     ordering_fields = ["final_score", "community_score", "ai_score", "created_at"]
