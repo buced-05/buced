@@ -1,0 +1,41 @@
+# Dépendances essentielles pour production VPS
+# Sans les dépendances ML lourdes qui causent des conflits
+
+# Django Core
+Django==5.0.4
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.3.1
+
+# CORS et sécurité
+django-cors-headers==4.9.0
+django-filter==25.1
+django-environ==0.11.2
+
+# Base de données
+psycopg2-binary==2.9.11
+
+# Channels pour WebSockets (optionnel)
+channels==4.3.1
+channels-redis==4.1.0
+daphne==4.2.1
+
+# Celery pour tâches asynchrones (optionnel)
+celery==5.3.6
+django-celery-beat==2.6.0
+django-celery-results==2.5.1
+redis==7.0.1
+
+# Utilitaires
+python-dotenv==1.0.1
+Pillow==10.2.0
+whitenoise==6.11.0
+
+# Documentation API
+drf-spectacular==0.29.0
+
+# Serveur WSGI/ASGI
+gunicorn==21.2.0
+
+# Note: Les dépendances ML (spacy, tensorflow, torch) sont optionnelles
+# et peuvent être installées plus tard si nécessaire
+

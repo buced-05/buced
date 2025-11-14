@@ -1,0 +1,79 @@
+#!/bin/bash
+# Script pour corriger le package.json corrompu
+
+echo "🔧 Correction du package.json..."
+
+# Sauvegarder l'ancien fichier
+if [ -f "package.json" ]; then
+    cp package.json package.json.backup
+    echo "✅ Ancien fichier sauvegardé dans package.json.backup"
+fi
+
+# Créer un nouveau package.json propre
+cat > package.json << 'EOF'
+{
+  "name": "bureau-clubs-educatifs-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.18",
+    "@heroicons/react": "^2.1.5",
+    "@tanstack/react-query": "^5.90.8",
+    "axios": "^1.6.8",
+    "chart.js": "^4.4.2",
+    "clsx": "^2.1.0",
+    "d3": "^7.8.5",
+    "dayjs": "^1.11.10",
+    "i18next": "^25.6.2",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^16.3.3",
+    "react-router-dom": "^6.22.3",
+    "recharts": "^2.9.0",
+    "socket.io-client": "^4.7.5",
+    "tailwind-merge": "^2.6.0",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.9",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.34.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.1.6"
+  }
+}
+EOF
+
+echo "✅ Nouveau package.json créé"
+
+# Vérifier la syntaxe JSON
+if node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))" 2>/dev/null; then
+    echo "✅ Syntaxe JSON valide"
+else
+    echo "❌ Erreur de syntaxe JSON"
+    exit 1
+fi
+
+echo ""
+echo "Prochaines étapes:"
+echo "1. npm install"
+echo "2. npm run build"
+

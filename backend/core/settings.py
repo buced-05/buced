@@ -58,8 +58,17 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "django_filters",
-    "channels",
     "drf_spectacular",
+]
+
+# Ajouter channels seulement s'il est installé (évite les conflits)
+try:
+    import channels
+    INSTALLED_APPS.append("channels")
+except ImportError:
+    pass
+
+INSTALLED_APPS += [
     # Project apps
     "apps.common",
     "apps.users",
@@ -103,7 +112,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
-ASGI_APPLICATION = "core.asgi.application"
+
+# ASGI seulement si channels est installé
+try:
+    import channels
+    ASGI_APPLICATION = "core.asgi.application"
+except ImportError:
+    ASGI_APPLICATION = None
 
 # Configuration de la base de données
 # Utilise SQLite par défaut si POSTGRES_HOST n'est pas configuré ou est "postgres" (Docker)
@@ -217,21 +232,38 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [env("REDIS_URL")],
+# Configuration Channels (WebSockets) - optionnel si Redis n'est pas disponible
+try:
+    import channels_redis  # type: ignore
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [env("REDIS_URL")],
+            },
         },
-    },
-}
+    }
+except ImportError:
+    # Fallback vers InMemoryChannelLayer si channels-redis n'est pas installé
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
 
-CELERY_BROKER_URL = env("REDIS_URL")
-CELERY_RESULT_BACKEND = env("REDIS_URL")
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = TIME_ZONE
+# Configuration Celery (optionnel - seulement si installé)
+try:
+    import celery
+    CELERY_BROKER_URL = env("REDIS_URL")
+    CELERY_RESULT_BACKEND = env("REDIS_URL")
+    CELERY_ACCEPT_CONTENT = ["json"]
+    CELERY_TASK_SERIALIZER = "json"
+    CELERY_RESULT_SERIALIZER = "json"
+    CELERY_TIMEZONE = TIME_ZONE
+except ImportError:
+    # Celery non installé - désactiver les tâches asynchrones
+    CELERY_BROKER_URL = None
+    CELERY_RESULT_BACKEND = None
 
 LOGGING = {
     "version": 1,
