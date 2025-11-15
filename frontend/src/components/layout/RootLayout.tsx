@@ -42,10 +42,10 @@ const RootLayout = () => {
     
     <div className="flex flex-1 flex-col relative z-10 w-full lg:w-auto">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
-      <main className={`flex-1 overflow-y-auto px-4 py-6 lg:px-12 lg:py-8 transition-colors duration-300 ${
+      <main className={`flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-12 lg:py-8 transition-colors duration-300 ${
         theme === "dark" ? "bg-[#0A0A0F]" : "bg-white"
-      }`} style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
-        <div className="mx-auto w-full max-w-7xl space-y-6 lg:space-y-8 pb-20 lg:pb-16 animate-fade-in">
+      }`} style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}>
+        <div className="mx-auto w-full max-w-7xl space-y-4 sm:space-y-6 lg:space-y-8 pb-24 sm:pb-20 lg:pb-16 animate-fade-in">
           <Outlet />
         </div>
       </main>

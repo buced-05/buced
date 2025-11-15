@@ -19,25 +19,25 @@ const ProjectsLeaderboard = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Top projets IA + Communauté</CardTitle>
-          <Badge variant="primary">Top 3</Badge>
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <CardTitle className="text-lg sm:text-xl">Top projets IA + Communauté</CardTitle>
+          <Badge variant="primary" className="text-sm px-3 py-1">Top 3</Badge>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className={`overflow-hidden rounded-xl border ${
+      <CardContent className="p-4 sm:p-6 pt-0">
+        <div className={`overflow-x-auto overflow-hidden rounded-xl border ${
           theme === "dark" ? "border-neon-cyan/20" : "border-gray-200"
         }`}>
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-base sm:text-sm min-w-[500px]">
             <thead className={`${
               theme === "dark" ? "bg-[#2A2A3E] text-gray-400" : "bg-gray-100 text-gray-600"
             }`}>
               <tr>
-                <th className="px-4 py-3 font-bold">Projet</th>
-                <th className="px-4 py-3 font-bold">Catégorie</th>
-                <th className="px-4 py-3 font-bold">Score final</th>
-                <th className="px-4 py-3 font-bold">Score communauté</th>
+                <th className="px-4 py-3 sm:py-3 font-bold text-base sm:text-sm">Projet</th>
+                <th className="px-4 py-3 sm:py-3 font-bold text-base sm:text-sm">Catégorie</th>
+                <th className="px-4 py-3 sm:py-3 font-bold text-base sm:text-sm">Score final</th>
+                <th className="px-4 py-3 sm:py-3 font-bold text-base sm:text-sm">Score communauté</th>
               </tr>
             </thead>
             <tbody>
@@ -51,22 +51,22 @@ const ProjectsLeaderboard = () => {
                   }`}
                   onClick={() => handleProjectClick(project.id)}
                 >
-                  <td className={`px-4 py-3 font-bold ${
+                  <td className={`px-4 py-4 sm:py-3 font-bold text-base sm:text-sm ${
                     theme === "dark" ? "text-white" : "text-gray-900"
                   }`}>
                     {project.title}
                   </td>
-                  <td className={`px-4 py-3 ${
+                  <td className={`px-4 py-4 sm:py-3 text-base sm:text-sm ${
                     theme === "dark" ? "text-gray-400" : "text-gray-600"
                   }`}>
                     {project.category}
                   </td>
-                  <td className={`px-4 py-3 font-bold ${
+                  <td className={`px-4 py-4 sm:py-3 font-bold text-base sm:text-sm ${
                     theme === "dark" ? "text-neon-cyan" : "text-blue-600"
                   }`}>
                     {project.finalScore}
                   </td>
-                  <td className={`px-4 py-3 font-bold ${
+                  <td className={`px-4 py-4 sm:py-3 font-bold text-base sm:text-sm ${
                     theme === "dark" ? "text-neon-purple" : "text-purple-600"
                   }`}>
                     {project.communityScore}

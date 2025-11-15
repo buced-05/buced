@@ -13,7 +13,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, ...props
     <div
       ref={ref}
       className={cn(
-        "relative overflow-hidden rounded-2xl p-6 shadow-lg transition-all duration-200",
+        "relative overflow-hidden rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-lg transition-all duration-200",
         theme === "dark"
           ? "border border-neon-cyan/20 bg-[#1A1A2E] hover:border-neon-cyan/30"
           : "border border-gray-200 bg-white hover:border-blue-300 hover:shadow-md",
