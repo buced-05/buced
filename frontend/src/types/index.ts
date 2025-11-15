@@ -1,17 +1,19 @@
 export type UserRole = "student" | "counselor" | "admin" | "sponsor" | "jury" | "mentor";
 
 export type User = {
-  id: string;
+  id: string | number;
   email: string;
   first_name: string;
   last_name: string;
-  full_name: string;
+  full_name?: string;
   role: UserRole;
   establishment?: string;
   photo?: string | null;
+  avatar?: string;
+  cover_photo?: string;
   bio?: string;
   phone_number?: string;
-  two_factor_enabled: boolean;
+  two_factor_enabled?: boolean;
   date_joined: string;
 };
 

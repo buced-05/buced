@@ -116,7 +116,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
 
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
@@ -367,7 +367,7 @@ export const safeArrayOps = {
       if (!Array.isArray(arr)) {
         return fallback;
       }
-      return arr.reduce((acc, item, index) => fn(acc, item as T, index), initial);
+      return arr.reduce<U>((acc, item, index) => fn(acc, item as T, index), initial);
     } catch {
       return fallback;
     }

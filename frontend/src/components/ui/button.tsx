@@ -5,7 +5,7 @@ import { useThemeStore } from "../../stores/theme";
 import { cn } from "../../utils/cn";
 import { Spinner } from "./spinner";
 
-export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "neon" | "dark";
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "neon" | "dark" | "success";
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 const getVariantClasses = (variant: ButtonVariant, theme: "dark" | "light"): string => {
@@ -21,6 +21,8 @@ const getVariantClasses = (variant: ButtonVariant, theme: "dark" | "light"): str
         return "text-blue-600 bg-transparent font-semibold hover:bg-blue-50 hover:text-blue-700 transition-all duration-200";
       case "dark":
         return "bg-gray-800 border-2 border-gray-700 text-white font-bold shadow-md hover:border-blue-500 hover:text-blue-400 transition-all duration-200";
+      case "success":
+        return "bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold shadow-md transition-all duration-200";
       default:
         return "";
     }
@@ -40,6 +42,8 @@ const getVariantClasses = (variant: ButtonVariant, theme: "dark" | "light"): str
       return "bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink text-[#0A0A0F] font-black shadow-neon transition-all duration-200";
     case "dark":
       return "bg-[#0A0A0F] border-2 border-[#1A1A2E] text-white font-bold shadow-lg hover:border-neon-cyan/30 hover:text-neon-cyan transition-all duration-200 relative overflow-hidden group";
+    case "success":
+      return "bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shadow-md transition-all duration-200";
     default:
       return "";
   }

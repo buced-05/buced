@@ -11,7 +11,7 @@ export const DeepLinkHandler = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => !!state.accessToken && !!state.user);
 
   useEffect(() => {
     // Handle deep links from URL parameters
@@ -66,7 +66,7 @@ export const DeepLinkHandler = () => {
 export function useProtectedDeepLink() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => !!state.accessToken && !!state.user);
 
   const navigateWithAuth = (path: string, requireAuth: boolean = false) => {
     if (requireAuth && !isAuthenticated) {

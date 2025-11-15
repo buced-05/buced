@@ -149,7 +149,7 @@ export const ProjectShare = ({ projectId, projectTitle, onClose }: ProjectShareP
         </div>
 
         {/* Native Share */}
-        {navigator.share && (
+        {typeof navigator.share === 'function' && (
           <Button variant="outline" size="lg" className="w-full" onClick={handleShareNative}>
             <ShareIcon className="h-5 w-5" />
             Partager via...

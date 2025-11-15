@@ -116,7 +116,7 @@ const RegisterPage = () => {
               } else if (typeof data[field] === 'object') {
                 // Erreurs imbriquées
                 const nestedErrors = Object.values(data[field]).flat();
-                newFieldErrors[field] = nestedErrors[0] || "Erreur de validation";
+                newFieldErrors[field] = (Array.isArray(nestedErrors) && nestedErrors.length > 0 && typeof nestedErrors[0] === 'string') ? nestedErrors[0] : "Erreur de validation";
               }
             });
 

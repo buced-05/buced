@@ -27,10 +27,10 @@ import { useThemeStore } from "../../stores/theme";
 import { useLanguageStore } from "../../stores/language";
 import { cn } from "../../utils/cn";
 import { projectsService, votesService } from "../../api/services";
-import type { Project, Vote } from "../../types/api";
+import type { Project, Vote, User } from "../../types/api";
 import useAuth from "../../hooks/useAuth";
 import { errorHandler, safeAsync } from "../../utils/errorHandler";
-import { safeArray, safeString, safeNumber } from "../../utils/validation";
+import { safeArray, safeString, safeNumber, safeObject } from "../../utils/validation";
 import { CompactComments } from "../../components/feed/CompactComments";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -315,18 +315,18 @@ const FeedPage = () => {
       const [projectsData, votesData] = await Promise.all([
         safeAsync(
           () => projectsService.list({ page: 1, pageSize: 20 }),
-          { results: [], next: null },
+          { results: [], next: null, previous: null, count: 0 },
           'Fetch Projects'
         ),
         safeAsync(
           () => votesService.list({ page: 1, pageSize: 20 }),
-          { results: [], next: null },
+          { results: [], next: null, previous: null, count: 0 },
           'Fetch Votes'
         ),
       ]);
 
       const items: FeedItem[] = [];
-      let projects = safeArray(projectsData?.results, []);
+      let projects: Project[] = safeArray(projectsData?.results, []);
 
       // Toujours utiliser les données mock pour avoir un flux riche
       // Mélanger avec les données réelles si disponibles
@@ -337,7 +337,7 @@ const FeedPage = () => {
         // Mélanger les projets réels avec les mock pour avoir plus de contenu
         try {
           const mockSlice = safeArray(mockProjects, []).slice(0, 10);
-          projects = [...safeArray(projects, []), ...mockSlice].sort((a, b) => {
+          projects = ([...safeArray(projects, []), ...mockSlice] as Project[]).sort((a, b) => {
             try {
               const dateA = safeString(a?.created_at, '');
               const dateB = safeString(b?.created_at, '');
@@ -355,14 +355,14 @@ const FeedPage = () => {
       }
 
       // Ajouter les projets avec validation robuste
-      safeArray(projects, []).forEach((project) => {
+      safeArray(projects, [] as Project[]).forEach((project: Project) => {
         try {
           if (!project || !project.id || typeof project.id !== 'number') {
             return; // Skip invalid projects
           }
           
           const itemId = `project-${project.id}`;
-          const owner = safeObject(project.owner, {});
+          const owner = (project.owner || {}) as User;
           const firstName = safeString(owner.first_name, '');
           const lastName = safeString(owner.last_name, '');
           const fullName = `${firstName} ${lastName}`.trim() || 'Utilisateur';
@@ -409,16 +409,14 @@ const FeedPage = () => {
       });
 
       // Ajouter les votes récents avec validation robuste
-      safeArray(votesData?.results, []).forEach((vote) => {
+      safeArray(votesData?.results, [] as Vote[]).forEach((vote: Vote) => {
         try {
           if (!vote || !vote.id || typeof vote.id !== 'number') {
             return; // Skip invalid votes
           }
           
-          const voter = safeObject(vote.voter, {});
-          const firstName = safeString(voter.first_name, '');
-          const lastName = safeString(voter.last_name, '');
-          const fullName = `${firstName} ${lastName}`.trim() || 'Utilisateur';
+          const voterId = safeNumber(vote.voter, 0);
+          const voterName = safeString(vote.voter_display, 'Utilisateur');
           
           items.push({
             id: `vote-${vote.id}`,
@@ -426,8 +424,8 @@ const FeedPage = () => {
             vote,
             timestamp: safeString(vote.created_at, new Date().toISOString()),
             user: {
-              id: safeNumber(voter.id, 0),
-              name: fullName,
+              id: voterId,
+              name: voterName,
             },
           });
         } catch (error) {
@@ -440,7 +438,7 @@ const FeedPage = () => {
       const lastNames = ["Traoré", "Diallo", "Koné", "Sangaré", "Coulibaly", "Kouassi", "Kouadio", "Yao", "Bamba", "Toure", "Cissé", "Keita", "Sylla", "Camara", "Bah", "Barry", "Sow", "Ba", "Ndiaye", "Diop", "Diawara", "Konaté", "Fofana", "Sidibé", "Dembélé"];
 
         // Générer des votes mock si pas de votes réels ou pour enrichir le flux
-        if ((votesData.results || []).length < 10) {
+        if ((votesData?.results || []).length < 10) {
           const mockVotes: Vote[] = [];
           const mockComments = [
           "Excellent projet ! Très innovant et prometteur.",
@@ -595,9 +593,9 @@ const FeedPage = () => {
       // En cas d'erreur, utiliser les données mock de manière sécurisée
       try {
         const mockProjects = createMockData();
-        const items: FeedItem[] = safeArray(mockProjects, []).map((project) => {
+        const items: FeedItem[] = safeArray(mockProjects, [] as Project[]).map((project: Project): FeedItem | null => {
           try {
-            const owner = safeObject(project?.owner, {});
+            const owner = (project?.owner || {}) as User;
             return {
               id: `project-${safeNumber(project?.id, 0)}`,
               type: "project" as const,
@@ -633,26 +631,26 @@ const FeedPage = () => {
       const [projectsData, votesData] = await Promise.all([
         safeAsync(
           () => projectsService.list({ page: nextPage, pageSize: 20 }),
-          { results: [], next: null },
+          { results: [], next: null, previous: null, count: 0 },
           'Load More Projects'
         ),
         safeAsync(
           () => votesService.list({ page: nextPage, pageSize: 20 }),
-          { results: [], next: null },
+          { results: [], next: null, previous: null, count: 0 },
           'Load More Votes'
         ),
       ]);
 
       const newItems: FeedItem[] = [];
 
-      safeArray(projectsData?.results, []).forEach((project) => {
+      safeArray(projectsData?.results, [] as Project[]).forEach((project: Project) => {
         try {
           if (!project || !project.id || typeof project.id !== 'number') {
             return;
           }
           
           const itemId = `project-${project.id}`;
-          const owner = safeObject(project.owner, {});
+          const owner = (project.owner || {}) as User;
           const firstName = safeString(owner.first_name, '');
           const lastName = safeString(owner.last_name, '');
           
@@ -696,15 +694,14 @@ const FeedPage = () => {
         }
       });
 
-      safeArray(votesData?.results, []).forEach((vote) => {
+      safeArray(votesData?.results, [] as Vote[]).forEach((vote: Vote) => {
         try {
           if (!vote || !vote.id || typeof vote.id !== 'number') {
             return;
           }
           
-          const voter = safeObject(vote.voter, {});
-          const firstName = safeString(voter.first_name, '');
-          const lastName = safeString(voter.last_name, '');
+          const voterId = safeNumber(vote.voter, 0);
+          const voterName = safeString(vote.voter_display, 'Utilisateur');
           
           newItems.push({
             id: `vote-${vote.id}`,
@@ -712,8 +709,8 @@ const FeedPage = () => {
             vote,
             timestamp: safeString(vote.created_at, new Date().toISOString()),
             user: {
-              id: safeNumber(voter.id, 0),
-              name: `${firstName} ${lastName}`.trim() || 'Utilisateur',
+              id: voterId,
+              name: voterName,
             },
           });
         } catch (error) {
@@ -790,7 +787,7 @@ const FeedPage = () => {
     }
   };
 
-  const filteredItems = safeArray(feedItems, []).filter((item) => {
+  const filteredItems = safeArray(feedItems, [] as FeedItem[]).filter((item: FeedItem) => {
     try {
       if (!item || !item.type) return false;
       if (filter === "all") return true;
@@ -1104,8 +1101,8 @@ const FeedPage = () => {
             const newComment = {
               id: Date.now(),
               user: {
-                id: user?.id || 0,
-                name: user?.full_name || user?.first_name || "Utilisateur",
+                id: (user?.id ?? 0) as number,
+                name: user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || "Utilisateur" : "Utilisateur",
               },
               content,
               created_at: new Date().toISOString(),

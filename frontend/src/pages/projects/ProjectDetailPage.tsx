@@ -157,7 +157,7 @@ const ProjectDetailPage = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <ProjectFavorites projectId={project.id} />
+          <ProjectFavorites projectId={project.id.toString()} />
           <Button variant="outline" size="md" onClick={() => setShowShare(!showShare)}>
             <ShareIcon className="h-4 w-4" />
             Partager
@@ -167,7 +167,7 @@ const ProjectDetailPage = () => {
 
       {showShare && (
         <ProjectShare
-          projectId={project.id}
+          projectId={project.id.toString()}
           projectTitle={project.title}
           onClose={() => setShowShare(false)}
         />
@@ -379,12 +379,12 @@ const ProjectDetailPage = () => {
 
       {/* Documents Section */}
       <div className="mt-6">
-        <ProjectDocuments projectId={project.id.toString()} isOwner={project.owner.id === user?.id} />
+        <ProjectDocuments projectId={project.id.toString()} isOwner={project.owner.id === Number(user?.id)} />
       </div>
 
       {/* Team Section */}
       <div className="mt-6">
-        <ProjectTeam projectId={project.id.toString()} isOwner={project.owner.id === user?.id} />
+        <ProjectTeam projectId={project.id.toString()} isOwner={project.owner.id === Number(user?.id)} />
       </div>
 
       {/* Timeline Section */}

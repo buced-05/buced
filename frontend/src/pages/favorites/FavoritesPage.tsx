@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/ca
 import { useThemeStore } from "../../stores/theme";
 import { cn } from "../../utils/cn";
 import ProjectCard from "../../components/projects/ProjectCard";
-import type { Project } from "../../types";
+import type { Project } from "../../types/api";
 import useAuth from "../../hooks/useAuth";
 
 const FavoritesPage = () => {
@@ -28,30 +28,36 @@ const FavoritesPage = () => {
       // Mock data
       const mockFavorites: Project[] = [
         {
-          id: "1",
+          id: 1,
           title: "EduSolar",
           description: "Solution solaire pour l'éducation en zone rurale",
           category: "Énergie",
-          current_status: "prototype",
+          status: "prototype",
+          owner: { id: 1, username: "", email: "", first_name: "", last_name: "", role: "student", date_joined: "" },
+          team: [],
+          progress: {},
+          documents: [],
           community_score: 88.5,
           ai_score: 92.1,
           final_score: 90.3,
-          likes_count: 120,
-          views_count: 540,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
         {
-          id: "2",
+          id: 2,
           title: "AgriConnect",
           description: "Plateforme mobile pour les agripreneurs",
           category: "AgriTech",
-          current_status: "mvp",
+          status: "mvp",
+          owner: { id: 2, username: "", email: "", first_name: "", last_name: "", role: "student", date_joined: "" },
+          team: [],
+          progress: {},
+          documents: [],
           community_score: 85.2,
           ai_score: 88.7,
           final_score: 87.0,
-          likes_count: 95,
-          views_count: 320,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ];
 

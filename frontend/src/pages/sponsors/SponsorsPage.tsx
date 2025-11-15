@@ -29,9 +29,9 @@ const SponsorsPage = () => {
       console.error("Erreur lors du chargement des sponsors:", err);
       // Fallback sur les données mock si l'API échoue
       setSponsors([
-        { id: 1, company: "Orange Côte d'Ivoire", total_budget: "45000000", interests: [], description: "", sponsorships: [] } as SponsorProfile,
-        { id: 2, company: "MTN Foundation", total_budget: "30000000", interests: [], description: "", sponsorships: [] } as SponsorProfile,
-        { id: 3, company: "Société Générale", total_budget: "25000000", interests: [], description: "", sponsorships: [] } as SponsorProfile,
+        { id: 1, company: "Orange Côte d'Ivoire", total_budget: "45000000", interests: [], description: "", sponsorships: [], user: { id: 1, username: "", email: "", first_name: "", last_name: "", role: "sponsor" as const, date_joined: "" } } as SponsorProfile,
+        { id: 2, company: "MTN Foundation", total_budget: "30000000", interests: [], description: "", sponsorships: [], user: { id: 2, username: "", email: "", first_name: "", last_name: "", role: "sponsor" as const, date_joined: "" } } as SponsorProfile,
+        { id: 3, company: "Société Générale", total_budget: "25000000", interests: [], description: "", sponsorships: [], user: { id: 3, username: "", email: "", first_name: "", last_name: "", role: "sponsor" as const, date_joined: "" } } as SponsorProfile,
       ]);
     } finally {
       setIsLoading(false);

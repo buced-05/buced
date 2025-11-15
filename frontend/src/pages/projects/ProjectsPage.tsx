@@ -94,8 +94,8 @@ const ProjectsPage = () => {
         totalCount = data.length;
       } else if (data && typeof data === 'object') {
         // Si la réponse est un objet avec results
-        projectsList = data.results || data.items || [];
-        totalCount = data.count || data.total || projectsList.length;
+        projectsList = data.results || [];
+        totalCount = data.count || projectsList.length;
       }
       
       setProjects(projectsList);

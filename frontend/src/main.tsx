@@ -25,14 +25,8 @@ const queryClient = new QueryClient({
         return failureCount < 2;
       },
       staleTime: 1000 * 60,
-      onError: (error) => {
-        console.error('Query error:', error);
-      },
     },
     mutations: {
-      onError: (error) => {
-        console.error('Mutation error:', error);
-      },
     },
   },
 });
