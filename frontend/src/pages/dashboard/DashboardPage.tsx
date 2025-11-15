@@ -15,8 +15,8 @@ const DashboardPage = () => {
       }`}>
         <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink" />
         <div className="relative z-10">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black gradient-text leading-tight">Bureau des Clubs Éducatifs</h2>
-          <p className={`mt-3 sm:mt-2 max-w-2xl text-base sm:text-sm font-medium leading-relaxed ${
+          <h2 className="text-3xl sm:text-3xl md:text-4xl font-black gradient-text leading-tight">Bureau des Clubs Éducatifs</h2>
+          <p className={`mt-4 sm:mt-2 max-w-2xl text-lg sm:text-sm font-medium leading-relaxed ${
             theme === "dark" ? "text-gray-300" : "text-gray-600"
           }`}>
             Pilotez l&apos;innovation ivoirienne : identifiez, évaluez et accompagnez les projets les plus prometteurs

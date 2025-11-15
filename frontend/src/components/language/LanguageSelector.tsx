@@ -31,12 +31,12 @@ export const LanguageSelector = () => {
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 p-2 sm:p-2",
+          "flex items-center gap-2 p-3 sm:p-2",
           theme === "dark" ? "text-gray-300 hover:text-white" : "text-gray-700 hover:text-gray-900"
         )}
       >
-        <GlobeAltIcon className="h-6 w-6 sm:h-5 sm:w-5" />
-        <span className="hidden sm:inline text-sm sm:text-base">{currentLanguage?.nativeName || "Français"}</span>
+        <GlobeAltIcon className="h-8 w-8 sm:h-5 sm:w-5" />
+        <span className="hidden sm:inline text-base sm:text-base">{currentLanguage?.nativeName || "Français"}</span>
       </Button>
 
       {isOpen && (

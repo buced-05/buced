@@ -44,7 +44,7 @@ const BottomNavigation = () => {
           : "0 -4px 20px rgba(0, 0, 0, 0.05)"
       }}
     >
-      <div className="flex items-center justify-around h-20 px-2">
+      <div className="flex items-center justify-around h-24 px-1">
         {mobileNavigation.map((item) => {
           const Icon = item.icon;
           const IconSolid = item.iconSolid;
@@ -58,15 +58,15 @@ const BottomNavigation = () => {
               to={item.to}
               className={cn(
                 "flex flex-col items-center justify-center flex-1 h-full",
-                "transition-all duration-200 rounded-lg mx-1",
-                "relative group py-2"
+                "transition-all duration-200 rounded-lg mx-0.5",
+                "relative group py-3"
               )}
             >
               {isActive ? (
                 <>
                   <div
                     className={cn(
-                      "absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1.5 rounded-b-full",
+                      "absolute top-0 left-1/2 -translate-x-1/2 w-20 h-2 rounded-b-full",
                       theme === "dark"
                         ? "bg-gradient-to-r from-neon-cyan to-neon-purple"
                         : "bg-gradient-to-r from-blue-600 to-purple-600"
@@ -74,13 +74,13 @@ const BottomNavigation = () => {
                   />
                   <IconSolid
                     className={cn(
-                      "h-8 w-8 mb-1.5 transition-transform duration-200",
+                      "h-10 w-10 mb-2 transition-transform duration-200",
                       theme === "dark" ? "text-neon-cyan" : "text-blue-600"
                     )}
                   />
                   <span
                     className={cn(
-                      "text-sm font-semibold leading-tight",
+                      "text-base font-bold leading-tight",
                       theme === "dark" ? "text-neon-cyan" : "text-blue-600"
                     )}
                   >
@@ -91,7 +91,7 @@ const BottomNavigation = () => {
                 <>
                   <Icon
                     className={cn(
-                      "h-8 w-8 mb-1.5 transition-all duration-200",
+                      "h-10 w-10 mb-2 transition-all duration-200",
                       theme === "dark"
                         ? "text-gray-500 group-hover:text-neon-cyan"
                         : "text-gray-400 group-hover:text-gray-600"
@@ -99,7 +99,7 @@ const BottomNavigation = () => {
                   />
                   <span
                     className={cn(
-                      "text-sm font-medium leading-tight",
+                      "text-base font-semibold leading-tight",
                       theme === "dark" ? "text-gray-500" : "text-gray-500"
                     )}
                   >

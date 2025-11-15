@@ -48,8 +48,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
   return (
     <header 
       className={cn(
-        "relative flex h-16 lg:h-20 items-center justify-between",
-        "px-4 lg:px-8 shadow-lg transition-colors duration-300",
+        "relative flex h-20 lg:h-20 items-center justify-between",
+        "px-4 sm:px-4 lg:px-8 shadow-lg transition-colors duration-300",
         theme === "dark" 
           ? "border-b border-neon-cyan/20 bg-[#1A1A2E]" 
           : "border-b border-gray-200 bg-white"
@@ -68,20 +68,20 @@ const Header = ({ onMenuClick }: HeaderProps) => {
       <button
         onClick={onMenuClick}
         className={cn(
-          "lg:hidden p-3 rounded-lg transition-colors mr-2",
+          "lg:hidden p-3.5 rounded-lg transition-colors mr-2",
           theme === "dark"
             ? "text-gray-400 hover:text-neon-cyan hover:bg-neon-cyan/10"
             : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
         )}
         aria-label="Ouvrir le menu"
       >
-        <Bars3Icon className="h-7 w-7" />
+        <Bars3Icon className="h-8 w-8" />
       </button>
 
       <div className="space-y-1 relative z-10 flex-shrink-0 flex-1 min-w-0">
         <div className="flex items-center gap-2 lg:gap-4">
           <h1 className={cn(
-            "font-heading text-xl sm:text-lg lg:text-2xl font-black truncate",
+            "font-heading text-2xl sm:text-lg lg:text-2xl font-black truncate",
             theme === "dark" ? "text-white" : "text-gray-900"
           )}>
             <span className="hidden sm:inline">Bienvenue, </span>
@@ -91,7 +91,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </h1>
           {user?.role && (
             <Badge variant="primary" className={cn(
-              "hidden sm:inline-flex text-xs sm:text-sm px-2 py-1",
+              "hidden sm:inline-flex text-sm sm:text-sm px-3 py-1.5",
               theme === "dark" ? "bg-gradient-to-r from-neon-cyan to-neon-purple text-[#0A0A0F]" : "bg-gray-200 text-gray-700"
             )}>
               {user.role}
@@ -99,7 +99,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           )}
         </div>
         <p className={cn(
-          "text-sm sm:text-xs lg:text-sm font-medium hidden sm:block",
+          "text-base sm:text-xs lg:text-sm font-medium hidden sm:block",
           theme === "dark" ? "text-gray-400" : "text-gray-600"
         )}>
           Suivez vos projets et les innovations en temps réel.
@@ -115,7 +115,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           type="button"
           onClick={toggleTheme}
           className={cn(
-            "rounded-lg p-3 transition-all duration-200",
+            "rounded-lg p-3.5 transition-all duration-200",
             "flex items-center justify-center",
             theme === "dark"
               ? "text-gray-400 hover:text-neon-cyan hover:bg-neon-cyan/10"
@@ -125,9 +125,9 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           title={theme === "dark" ? "Passer au thème clair" : "Passer au thème sombre"}
         >
           {theme === "dark" ? (
-            <SunIcon className="h-6 w-6" />
+            <SunIcon className="h-8 w-8" />
           ) : (
-            <MoonIcon className="h-6 w-6" />
+            <MoonIcon className="h-8 w-8" />
           )}
         </button>
         
@@ -135,16 +135,16 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           type="button"
           onClick={() => setNotificationsOpen(!notificationsOpen)}
           className={cn(
-            "relative rounded-lg p-3 lg:p-2.5 transition-all duration-300 shadow-md",
+            "relative rounded-lg p-3.5 lg:p-2.5 transition-all duration-300 shadow-md",
             theme === "dark"
               ? "border border-neon-cyan/30 bg-[#2A2A3E] text-gray-400 hover:text-neon-cyan hover:bg-neon-cyan/10 hover:border-neon-cyan/50"
               : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 shadow-sm"
           )}
         >
-          <BellIcon className="h-6 w-6" />
+          <BellIcon className="h-8 w-8" />
           {unreadCount > 0 ? (
             <span className={cn(
-              "absolute -right-1 -top-1 inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full px-1.5 text-xs font-bold text-white",
+              "absolute -right-0.5 -top-0.5 inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded-full px-2 text-sm font-bold text-white",
               theme === "dark" 
                 ? "bg-gradient-to-r from-neon-pink to-neon-purple shadow-neon-pink"
                 : "bg-red-500 shadow-md"
@@ -162,14 +162,14 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             type="button"
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className={cn(
-              "flex items-center gap-2 rounded-lg px-3 lg:px-3 py-2.5 transition-all duration-300 shadow-md",
+              "flex items-center gap-2 rounded-lg px-3.5 lg:px-3 py-3 transition-all duration-300 shadow-md",
               theme === "dark"
                 ? "border border-neon-cyan/30 bg-[#2A2A3E] text-gray-300 hover:text-neon-cyan hover:bg-neon-cyan/10 hover:border-neon-cyan/50"
                 : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900 shadow-sm"
             )}
           >
-            <UserCircleIcon className="h-6 w-6" />
-            <span className="text-sm font-medium hidden lg:inline">{user?.full_name?.split(" ")[0] ?? "Utilisateur"}</span>
+            <UserCircleIcon className="h-8 w-8" />
+            <span className="text-base font-medium hidden lg:inline">{user?.full_name?.split(" ")[0] ?? "Utilisateur"}</span>
           </button>
 
           {userMenuOpen && (

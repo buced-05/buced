@@ -21,32 +21,32 @@ const ActivityFeed = () => {
 
   return (
     <Card>
-      <CardHeader className="p-4 sm:p-6">
+      <CardHeader className="p-5 sm:p-6">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <CardTitle className="text-lg sm:text-xl">Actualités</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => navigate("/projects")} className="text-xs sm:text-sm px-3 py-2">
+          <CardTitle className="text-xl sm:text-xl">Actualités</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => navigate("/projects")} className="text-sm sm:text-sm px-4 py-2.5">
             Voir toutes les actualités
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6 pt-0">
-        <ul className="space-y-3 sm:space-y-4">
+      <CardContent className="p-5 sm:p-6 pt-0">
+        <ul className="space-y-4 sm:space-y-4">
           {activities.map((activity) => (
             <li
               key={activity.id}
-              className={`rounded-xl border p-4 sm:p-4 transition-all duration-300 cursor-pointer ${
+              className={`rounded-xl border p-5 sm:p-4 transition-all duration-300 cursor-pointer ${
                 theme === "dark"
                   ? "border-neon-cyan/20 bg-[#2A2A3E] hover:border-neon-cyan/50"
                   : "border-gray-200 bg-gray-50 hover:border-blue-300 hover:bg-gray-100"
               }`}
               onClick={() => handleActivityClick(activity.projectId)}
             >
-              <p className={`font-bold text-base sm:text-sm ${
+              <p className={`font-bold text-lg sm:text-sm ${
                 theme === "dark" ? "text-white" : "text-gray-900"
               }`}>
                 {activity.title}
               </p>
-              <p className={`text-sm sm:text-xs mt-2 sm:mt-1 ${
+              <p className={`text-base sm:text-xs mt-3 sm:mt-1 ${
                 theme === "dark" ? "text-gray-500" : "text-gray-600"
               }`}>
                 {activity.time}

@@ -335,63 +335,104 @@ const FeedPage = () => {
         projects = mockProjects;
       } else {
         // Mélanger les projets réels avec les mock pour avoir plus de contenu
-        projects = [...projects, ...mockProjects.slice(0, 10)].sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        try {
+          const mockSlice = safeArray(mockProjects, []).slice(0, 10);
+          projects = [...safeArray(projects, []), ...mockSlice].sort((a, b) => {
+            try {
+              const dateA = safeString(a?.created_at, '');
+              const dateB = safeString(b?.created_at, '');
+              const timeA = new Date(dateA).getTime();
+              const timeB = new Date(dateB).getTime();
+              return timeB - timeA;
+            } catch {
+              return 0;
+            }
+          });
+        } catch (error) {
+          errorHandler.logError(error, 'FeedPage: Merge Projects');
+          projects = safeArray(projects, []);
+        }
       }
 
-      // Ajouter les projets avec validation
-      projects.forEach((project) => {
-        if (!project || !project.id) return; // Skip invalid projects
-        
-        const itemId = `project-${project.id}`;
-        const owner = project.owner || {};
-        const firstName = safeString(owner.first_name, '');
-        const lastName = safeString(owner.last_name, '');
-        
-        items.push({
-          id: itemId,
-          type: "project",
-          project,
-          timestamp: safeString(project.created_at, new Date().toISOString()),
-          user: {
-            id: safeNumber(owner.id, 0),
-            name: `${firstName} ${lastName}`.trim() || 'Utilisateur',
-          },
-        });
-        // Initialiser les compteurs
-        if (!viewCounts[itemId]) {
-          setViewCounts((prev) => ({
-            ...prev,
-            [itemId]: Math.floor(Math.random() * 500) + 100,
-          }));
-        }
-        if (!likeCounts[itemId]) {
-          setLikeCounts((prev) => ({
-            ...prev,
-            [itemId]: Math.floor(Math.random() * 50) + 10,
-          }));
+      // Ajouter les projets avec validation robuste
+      safeArray(projects, []).forEach((project) => {
+        try {
+          if (!project || !project.id || typeof project.id !== 'number') {
+            return; // Skip invalid projects
+          }
+          
+          const itemId = `project-${project.id}`;
+          const owner = safeObject(project.owner, {});
+          const firstName = safeString(owner.first_name, '');
+          const lastName = safeString(owner.last_name, '');
+          const fullName = `${firstName} ${lastName}`.trim() || 'Utilisateur';
+          
+          items.push({
+            id: itemId,
+            type: "project",
+            project,
+            timestamp: safeString(project.created_at, new Date().toISOString()),
+            user: {
+              id: safeNumber(owner.id, 0),
+              name: fullName,
+            },
+          });
+          
+          // Initialiser les compteurs de manière sécurisée
+          if (!viewCounts[itemId]) {
+            setViewCounts((prev) => {
+              try {
+                return {
+                  ...prev,
+                  [itemId]: Math.floor(Math.random() * 500) + 100,
+                };
+              } catch {
+                return prev;
+              }
+            });
+          }
+          if (!likeCounts[itemId]) {
+            setLikeCounts((prev) => {
+              try {
+                return {
+                  ...prev,
+                  [itemId]: Math.floor(Math.random() * 50) + 10,
+                };
+              } catch {
+                return prev;
+              }
+            });
+          }
+        } catch (error) {
+          errorHandler.logError(error, 'FeedPage: Process Project');
         }
       });
 
-      // Ajouter les votes récents avec validation
+      // Ajouter les votes récents avec validation robuste
       safeArray(votesData?.results, []).forEach((vote) => {
-        if (!vote || !vote.id) return; // Skip invalid votes
-        
-        const voter = vote.voter || {};
-        const firstName = safeString(voter.first_name, '');
-        const lastName = safeString(voter.last_name, '');
-        
-        items.push({
-          id: `vote-${vote.id}`,
-          type: "vote",
-          vote,
-          timestamp: safeString(vote.created_at, new Date().toISOString()),
-          user: {
-            id: safeNumber(voter.id, 0),
-            name: `${firstName} ${lastName}`.trim() || 'Utilisateur',
-          },
-        });
+        try {
+          if (!vote || !vote.id || typeof vote.id !== 'number') {
+            return; // Skip invalid votes
+          }
+          
+          const voter = safeObject(vote.voter, {});
+          const firstName = safeString(voter.first_name, '');
+          const lastName = safeString(voter.last_name, '');
+          const fullName = `${firstName} ${lastName}`.trim() || 'Utilisateur';
+          
+          items.push({
+            id: `vote-${vote.id}`,
+            type: "vote",
+            vote,
+            timestamp: safeString(vote.created_at, new Date().toISOString()),
+            user: {
+              id: safeNumber(voter.id, 0),
+              name: fullName,
+            },
+          });
+        } catch (error) {
+          errorHandler.logError(error, 'FeedPage: Process Vote');
+        }
       });
 
       // Noms pour générer les données mock
@@ -532,27 +573,52 @@ const FeedPage = () => {
         });
       });
 
-      // Trier par timestamp
-      items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      // Trier par timestamp de manière sécurisée
+      items.sort((a, b) => {
+        try {
+          const timeA = new Date(safeString(a?.timestamp, '')).getTime();
+          const timeB = new Date(safeString(b?.timestamp, '')).getTime();
+          if (isNaN(timeA) || isNaN(timeB)) return 0;
+          return timeB - timeA;
+        } catch {
+          return 0;
+        }
+      });
 
-      setFeedItems(items);
-      setHasMore(projectsData.next !== null || votesData.next !== null);
+      setFeedItems(safeArray(items, []));
+      setHasMore(
+        (projectsData?.next !== null && projectsData?.next !== undefined) ||
+        (votesData?.next !== null && votesData?.next !== undefined)
+      );
     } catch (err) {
-      console.error("Erreur lors du chargement du flux:", err);
-      // En cas d'erreur, utiliser les données mock
-      const mockProjects = createMockData();
-      const items: FeedItem[] = mockProjects.map((project) => ({
-        id: `project-${project.id}`,
-        type: "project",
-        project,
-        timestamp: project.created_at,
-        user: {
-          id: project.owner.id,
-          name: `${project.owner.first_name} ${project.owner.last_name}`,
-        },
-      }));
-      setFeedItems(items);
-      setHasMore(false);
+      errorHandler.logError(err, 'FeedPage: Fetch Feed');
+      // En cas d'erreur, utiliser les données mock de manière sécurisée
+      try {
+        const mockProjects = createMockData();
+        const items: FeedItem[] = safeArray(mockProjects, []).map((project) => {
+          try {
+            const owner = safeObject(project?.owner, {});
+            return {
+              id: `project-${safeNumber(project?.id, 0)}`,
+              type: "project" as const,
+              project,
+              timestamp: safeString(project?.created_at, new Date().toISOString()),
+              user: {
+                id: safeNumber(owner.id, 0),
+                name: `${safeString(owner.first_name, '')} ${safeString(owner.last_name, '')}`.trim() || 'Utilisateur',
+              },
+            };
+          } catch {
+            return null;
+          }
+        }).filter((item): item is FeedItem => item !== null);
+        setFeedItems(items);
+        setHasMore(false);
+      } catch (fallbackError) {
+        errorHandler.logError(fallbackError, 'FeedPage: Fallback Mock Data');
+        setFeedItems([]);
+        setHasMore(false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -563,58 +629,112 @@ const FeedPage = () => {
 
     setIsLoading(true);
     try {
-      const nextPage = page + 1;
+      const nextPage = safeNumber(page, 1) + 1;
       const [projectsData, votesData] = await Promise.all([
-        projectsService.list({ page: nextPage, pageSize: 20 }),
-        votesService.list({ page: nextPage, pageSize: 20 }),
+        safeAsync(
+          () => projectsService.list({ page: nextPage, pageSize: 20 }),
+          { results: [], next: null },
+          'Load More Projects'
+        ),
+        safeAsync(
+          () => votesService.list({ page: nextPage, pageSize: 20 }),
+          { results: [], next: null },
+          'Load More Votes'
+        ),
       ]);
 
       const newItems: FeedItem[] = [];
 
-      projectsData.results?.forEach((project) => {
-        const itemId = `project-${project.id}`;
-        newItems.push({
-          id: itemId,
-          type: "project",
-          project,
-          timestamp: project.created_at,
-          user: {
-            id: project.owner.id,
-            name: `${project.owner.first_name} ${project.owner.last_name}`,
-          },
-        });
-        if (!viewCounts[itemId]) {
-          setViewCounts((prev) => ({
-            ...prev,
-            [itemId]: Math.floor(Math.random() * 500) + 100,
-          }));
-        }
-        if (!likeCounts[itemId]) {
-          setLikeCounts((prev) => ({
-            ...prev,
-            [itemId]: Math.floor(Math.random() * 50) + 10,
-          }));
+      safeArray(projectsData?.results, []).forEach((project) => {
+        try {
+          if (!project || !project.id || typeof project.id !== 'number') {
+            return;
+          }
+          
+          const itemId = `project-${project.id}`;
+          const owner = safeObject(project.owner, {});
+          const firstName = safeString(owner.first_name, '');
+          const lastName = safeString(owner.last_name, '');
+          
+          newItems.push({
+            id: itemId,
+            type: "project",
+            project,
+            timestamp: safeString(project.created_at, new Date().toISOString()),
+            user: {
+              id: safeNumber(owner.id, 0),
+              name: `${firstName} ${lastName}`.trim() || 'Utilisateur',
+            },
+          });
+          
+          if (!viewCounts[itemId]) {
+            setViewCounts((prev) => {
+              try {
+                return {
+                  ...safeObject(prev, {}),
+                  [itemId]: Math.floor(Math.random() * 500) + 100,
+                };
+              } catch {
+                return prev;
+              }
+            });
+          }
+          if (!likeCounts[itemId]) {
+            setLikeCounts((prev) => {
+              try {
+                return {
+                  ...safeObject(prev, {}),
+                  [itemId]: Math.floor(Math.random() * 50) + 10,
+                };
+              } catch {
+                return prev;
+              }
+            });
+          }
+        } catch (error) {
+          errorHandler.logError(error, 'FeedPage: Load More Project');
         }
       });
 
-      votesData.results?.forEach((vote) => {
-        newItems.push({
-          id: `vote-${vote.id}`,
-          type: "vote",
-          vote,
-          timestamp: vote.created_at || new Date().toISOString(),
-          user: {
-            id: vote.voter?.id || 0,
-            name: vote.voter?.first_name ? `${vote.voter.first_name} ${vote.voter.last_name}` : "Utilisateur",
-          },
-        });
+      safeArray(votesData?.results, []).forEach((vote) => {
+        try {
+          if (!vote || !vote.id || typeof vote.id !== 'number') {
+            return;
+          }
+          
+          const voter = safeObject(vote.voter, {});
+          const firstName = safeString(voter.first_name, '');
+          const lastName = safeString(voter.last_name, '');
+          
+          newItems.push({
+            id: `vote-${vote.id}`,
+            type: "vote",
+            vote,
+            timestamp: safeString(vote.created_at, new Date().toISOString()),
+            user: {
+              id: safeNumber(voter.id, 0),
+              name: `${firstName} ${lastName}`.trim() || 'Utilisateur',
+            },
+          });
+        } catch (error) {
+          errorHandler.logError(error, 'FeedPage: Load More Vote');
+        }
       });
 
-      setFeedItems((prev) => [...prev, ...newItems]);
-      setHasMore(projectsData.next !== null || votesData.next !== null);
+      setFeedItems((prev) => {
+        try {
+          return [...safeArray(prev, []), ...safeArray(newItems, [])];
+        } catch {
+          return prev;
+        }
+      });
+      setHasMore(
+        (projectsData?.next !== null && projectsData?.next !== undefined) ||
+        (votesData?.next !== null && votesData?.next !== undefined)
+      );
       setPage(nextPage);
     } catch (err) {
-      console.error("Erreur lors du chargement:", err);
+      errorHandler.logError(err, 'FeedPage: Load More');
     } finally {
       setIsLoading(false);
     }
@@ -670,12 +790,17 @@ const FeedPage = () => {
     }
   };
 
-  const filteredItems = feedItems.filter((item) => {
-    if (filter === "all") return true;
-    if (filter === "projects") return item.type === "project";
-    if (filter === "votes") return item.type === "vote";
-    if (filter === "achievements") return item.type === "achievement";
-    return true;
+  const filteredItems = safeArray(feedItems, []).filter((item) => {
+    try {
+      if (!item || !item.type) return false;
+      if (filter === "all") return true;
+      if (filter === "projects") return item.type === "project";
+      if (filter === "votes") return item.type === "vote";
+      if (filter === "achievements") return item.type === "achievement";
+      return true;
+    } catch {
+      return false;
+    }
   });
 
   const renderProjectCard = (item: FeedItem, index: number) => {
@@ -692,7 +817,7 @@ const FeedPage = () => {
       <Card
         key={item.id}
         className={cn(
-          "overflow-hidden group hover:scale-[1.02] transition-all duration-300",
+          "overflow-hidden group hover:scale-[1.01] transition-all duration-300 w-full",
           theme === "dark" ? "hover:shadow-neon-lg" : "hover:shadow-xl"
         )}
         style={{ animationDelay: `${index * 50}ms` }}
@@ -1013,7 +1138,7 @@ const FeedPage = () => {
       <Card
         key={item.id}
         className={cn(
-          "p-6 group hover:scale-[1.02] transition-all duration-300",
+          "p-6 group hover:scale-[1.01] transition-all duration-300 w-full",
           theme === "dark" 
             ? "hover:shadow-neon-lg bg-gradient-to-br from-[#1A1A2E] to-[#2A2A3E]" 
             : "hover:shadow-lg bg-white"
@@ -1119,7 +1244,7 @@ const FeedPage = () => {
       <Card
         key={item.id}
         className={cn(
-          "p-6 group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden",
+          "p-6 group hover:scale-[1.01] transition-all duration-300 relative overflow-hidden w-full",
           theme === "dark"
             ? "bg-gradient-to-br from-[#1A1A2E] via-[#2A2A3E] to-[#1A1A2E] border-neon-yellow/30 hover:border-neon-yellow/50"
             : "bg-white border-yellow-200 hover:border-yellow-300"
@@ -1164,15 +1289,15 @@ const FeedPage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 pb-8">
-      {/* Header amélioré */}
+    <div className="w-full max-w-full space-y-4 sm:space-y-6 pb-8 px-0 overflow-x-hidden relative">
+      {/* Header amélioré - plein écran */}
       <header className={cn(
-        "sticky top-0 z-10 backdrop-blur-xl p-4 sm:p-6 shadow-lg border-b",
+        "sticky top-0 z-10 backdrop-blur-xl p-4 sm:p-6 shadow-lg border-b w-full max-w-full overflow-x-hidden",
         theme === "dark"
           ? "bg-[#0A0A0F]/95 border-neon-cyan/20"
           : "bg-white/95 border-gray-200"
       )}>
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 px-4 sm:px-6 lg:px-12">
           <div>
             <h2 className={cn("text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-1 sm:mb-2", theme === "dark" ? "gradient-text" : "text-gray-900")}>
               {t("feed.title")}
@@ -1184,7 +1309,7 @@ const FeedPage = () => {
         </div>
 
         {/* Filters améliorés */}
-        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto overflow-y-hidden pb-2 scrollbar-hide px-4 sm:px-6 lg:px-12 max-w-full">
           {[
             { key: "all", labelKey: "feed.filterAll", activeDark: "bg-gradient-to-r from-neon-cyan to-neon-purple", activeLight: "bg-blue-600" },
             { key: "projects", labelKey: "feed.filterProjects", activeDark: "bg-gradient-to-r from-neon-purple to-neon-pink", activeLight: "bg-purple-600" },
@@ -1217,8 +1342,8 @@ const FeedPage = () => {
         </div>
       </header>
 
-      {/* Feed */}
-      <div className="space-y-8">
+      {/* Feed - plein écran */}
+      <div className="space-y-6 sm:space-y-8 px-4 sm:px-6 lg:px-12 w-full max-w-full overflow-x-hidden">
         {isLoading && feedItems.length === 0 ? (
           <div className="text-center py-20">
             <div

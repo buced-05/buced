@@ -15,7 +15,7 @@ const RootLayout = () => {
   return (
     <>
       <DeepLinkHandler />
-      <div className={`relative flex min-h-screen transition-colors duration-300 ${
+      <div className={`relative flex min-h-screen transition-colors duration-300 w-full max-w-full overflow-x-hidden ${
         theme === "dark" 
           ? "bg-[#0A0A0F] text-white" 
           : "bg-white text-gray-900"
@@ -40,12 +40,12 @@ const RootLayout = () => {
     {/* Mobile Drawer */}
     <MobileDrawer open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     
-    <div className="flex flex-1 flex-col relative z-10 w-full lg:w-auto">
+    <div className="flex flex-1 flex-col relative z-10 w-full max-w-full overflow-x-hidden lg:w-auto">
       <Header onMenuClick={() => setMobileMenuOpen(true)} />
-      <main className={`flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 lg:px-12 lg:py-8 transition-colors duration-300 ${
+      <main className={`flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-5 sm:py-6 lg:px-12 lg:py-8 transition-colors duration-300 w-full max-w-full ${
         theme === "dark" ? "bg-[#0A0A0F]" : "bg-white"
-      }`} style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}>
-        <div className="mx-auto w-full max-w-7xl space-y-4 sm:space-y-6 lg:space-y-8 pb-24 sm:pb-20 lg:pb-16 animate-fade-in">
+      }`} style={{ paddingBottom: "calc(6.5rem + env(safe-area-inset-bottom))" }}>
+        <div className="mx-auto w-full max-w-full space-y-5 sm:space-y-6 lg:space-y-8 pb-28 sm:pb-20 lg:pb-16 animate-fade-in overflow-x-hidden">
           <Outlet />
         </div>
       </main>
