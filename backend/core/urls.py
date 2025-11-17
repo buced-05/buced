@@ -18,7 +18,9 @@ except ImportError:
         return Response({"status": "healthy", "message": "API is running"}, status=200)
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    # Panel administrateur à /boss pour éviter les conflits
+    path("boss/", admin.site.urls),
+    path("admin/", admin.site.urls),  # Garder aussi /admin pour compatibilité
     path("api/health/", health_check, name="health-check"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

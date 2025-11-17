@@ -27,20 +27,29 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DJANGO_DEBUG")
 
-# Sécurité en production
-if not DEBUG:
-    # HTTPS uniquement en production
-    SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=False, cast=bool)
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = "DENY"
-    SECURE_HSTS_SECONDS = 31536000  # 1 an
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+# Sécurité en production (sera configuré après CORS_ALLOWED_ORIGINS)
+SECURE_SSL_REDIRECT = False
 
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
+# Configuration des domaines autorisés pour VPS
+ALLOWED_HOSTS_ENV = env("DJANGO_ALLOWED_HOSTS")
+if isinstance(ALLOWED_HOSTS_ENV, str):
+    # Si c'est une chaîne, la convertir en liste
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",") if host.strip()]
+else:
+    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV if isinstance(ALLOWED_HOSTS_ENV, list) else ["*"]
+
+# Ajouter automatiquement le domaine et l'IP en production
+if not DEBUG:
+    # Domaines par défaut pour production VPS
+    default_hosts = [
+        "foundation.newtiv.com",
+        "91.108.120.78",
+        "localhost",
+        "127.0.0.1",
+    ]
+    for host in default_hosts:
+        if host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(host)
 
 SITE_ID = 1
 
@@ -212,14 +221,54 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG or not bool(env("CORS_ALLOWED_ORIGINS"))
-CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS") if env("CORS_ALLOWED_ORIGINS") else [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:3000",
-]
+# Configuration CORS pour VPS
+CORS_ALLOWED_ORIGINS_ENV = env("CORS_ALLOWED_ORIGINS")
+if CORS_ALLOWED_ORIGINS_ENV:
+    if isinstance(CORS_ALLOWED_ORIGINS_ENV, str):
+        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_ENV.split(",") if origin.strip()]
+    else:
+        CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS_ENV if isinstance(CORS_ALLOWED_ORIGINS_ENV, list) else []
+else:
+    CORS_ALLOWED_ORIGINS = []
+
+# Ajouter les origines par défaut pour production VPS
+if not DEBUG:
+    default_origins = [
+        "http://foundation.newtiv.com",
+        "https://foundation.newtiv.com",
+        "http://91.108.120.78",
+        "https://91.108.120.78",
+    ]
+    for origin in default_origins:
+        if origin not in CORS_ALLOWED_ORIGINS:
+            CORS_ALLOWED_ORIGINS.append(origin)
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG or len(CORS_ALLOWED_ORIGINS) == 0
 CORS_ALLOW_CREDENTIALS = True
+
+# Configuration de sécurité en production (après CORS_ALLOWED_ORIGINS)
+if not DEBUG:
+    # HTTPS uniquement si SSL est activé (via Nginx)
+    SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", default=False, cast=bool)
+    # Désactiver les cookies sécurisés si pas de HTTPS pour éviter les conflits
+    SESSION_COOKIE_SECURE = SECURE_SSL_REDIRECT
+    CSRF_COOKIE_SECURE = SECURE_SSL_REDIRECT
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+    # HSTS seulement si HTTPS est activé
+    if SECURE_SSL_REDIRECT:
+        SECURE_HSTS_SECONDS = 31536000  # 1 an
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
+    
+    # Configuration pour être derrière un proxy Nginx
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if SECURE_SSL_REDIRECT else None
+    
+    # CSRF trusted origins (copie de CORS_ALLOWED_ORIGINS)
+    CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy() if CORS_ALLOWED_ORIGINS else []
+
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
