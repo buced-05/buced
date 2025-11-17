@@ -12,7 +12,8 @@ Plateforme d’innovation éducative combinant orientation, sélection assistée
 1. Installer Docker et Docker Compose
 2. Copier `infra/env.sample` vers `backend/.env` et compléter les variables sensibles
 3. Lancer `docker compose up --build`
-4. Accéder au frontend sur http://localhost:5173 et à l’API sur http://localhost:8000/api/v1/
+4. Accéder au frontend sur http://localhost:5173 et à l'API sur http://localhost:8000/api/v1/
+5. Accéder au panel administrateur sur http://localhost:8000/boss/ ou http://localhost:8000/admin/
 
 ## Structure
 ```
@@ -39,6 +40,20 @@ infra/     # Configurations infra (Nginx, envs)
 - Docker compose : backend, frontend, PostgreSQL, Redis
 - Nginx (reverse proxy + TLS)
 - Monitoring & CI/CD à intégrer (GitHub Actions + Sentry)
+
+## Production VPS
+- **Domaine**: foundation.newtiv.com
+- **IP Publique**: 91.108.120.78
+- **SSH**: `ssh root@91.108.120.78`
+- **Panel Admin**: http://foundation.newtiv.com/boss/ ou http://91.108.120.78/boss/
+
+### Déploiement Sans Conflits
+```bash
+ssh root@91.108.120.78
+cd /root/buced/backend
+./scripts/deploy_vps_safe.sh  # Gestion automatique des conflits
+```
+Voir `DEPLOY_CONFLICT_FREE.md` pour le guide complet.
 
 ## Roadmap
 - Phase 1 : Setup & Authentification ✅

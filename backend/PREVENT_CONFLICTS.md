@@ -67,7 +67,8 @@ SECRET_KEY=votre-cle-secrete-tres-longue-et-aleatoire
 
 # Production
 DJANGO_DEBUG=0
-DJANGO_ALLOWED_HOSTS=votre-domaine.com,IP_DU_VPS
+DJANGO_ALLOWED_HOSTS=votre-domaine.com,91.108.120.78,localhost,127.0.0.1
+# Pour foundation.newtiv.com: foundation.newtiv.com,91.108.120.78,localhost,127.0.0.1
 
 # Base de données (optionnel - SQLite par défaut)
 POSTGRES_HOST=localhost  # ou laissez vide pour SQLite
@@ -222,7 +223,30 @@ pip install -r requirements-production.txt
 # Test rapide
 python manage.py check
 python manage.py runserver 0.0.0.0:8000
+
+# Tester les URLs importantes
+curl http://localhost:8000/api/health/
+curl http://localhost:8000/boss/
 ```
+
+## 🌐 URLs importantes
+
+Après le déploiement :
+
+- **API**: http://localhost:8000/api/v1/
+- **Panel Admin**: http://localhost:8000/boss/ (ou http://localhost:8000/admin/ qui redirige)
+- **API Health**: http://localhost:8000/api/health/
+- **Documentation**: http://localhost:8000/api/docs/swagger/
+
+En production avec domaine :
+- **Frontend**: http://votre-domaine.com (ou http://91.108.120.78)
+- **API**: http://votre-domaine.com/api (ou http://91.108.120.78/api)
+- **Panel Admin**: http://votre-domaine.com/boss/ (ou http://91.108.120.78/boss/)
+
+**Production VPS**:
+- **Domaine**: foundation.newtiv.com
+- **IP Publique**: 91.108.120.78
+- **SSH**: `ssh root@91.108.120.78`
 
 ## ⚠️ À éviter absolument
 

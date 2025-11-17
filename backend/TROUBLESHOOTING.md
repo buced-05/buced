@@ -178,7 +178,29 @@ python manage.py check --deploy
 # Tester l'API
 curl http://localhost:8000/api/health/
 
+# Tester le panel admin
+curl http://localhost:8000/boss/
+
 # Vérifier les logs
 tail -f logs/django.log  # Si configuré
 ```
+
+## URLs importantes
+
+Après le déploiement, les URLs suivantes sont disponibles :
+
+- **API**: http://localhost:8000/api/v1/
+- **Panel Admin**: http://localhost:8000/boss/ (ou http://localhost:8000/admin/ qui redirige)
+- **API Health**: http://localhost:8000/api/health/
+- **Documentation**: http://localhost:8000/api/docs/swagger/
+
+En production avec domaine :
+- **Frontend**: http://votre-domaine.com (ou http://91.108.120.78)
+- **API**: http://votre-domaine.com/api (ou http://91.108.120.78/api)
+- **Panel Admin**: http://votre-domaine.com/boss/ (ou http://91.108.120.78/boss/)
+
+**Production VPS**:
+- **Domaine**: foundation.newtiv.com
+- **IP Publique**: 91.108.120.78
+- **SSH**: `ssh root@91.108.120.78`
 

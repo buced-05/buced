@@ -27,18 +27,99 @@ fi
 cd "$PROJECT_ROOT"
 
 # ============================================
-# ÉTAPE 1: Mise à jour du code
+# ÉTAPE 1: Mise à jour du code avec gestion avancée des conflits
 # ============================================
 echo -e "${BLUE}📥 Étape 1: Mise à jour du code depuis Git...${NC}"
+
+# Configurer Git pour éviter les conflits
 git config pull.rebase false
-git pull origin main || {
-    echo -e "${YELLOW}⚠️  Conflits Git détectés. Résolution...${NC}"
-    git stash
-    git pull origin main
-    git stash pop || true
+git config merge.ours.driver true
+
+# Vérifier l'état Git
+if [ -n "$(git status --porcelain)" ]; then
+    echo -e "${YELLOW}⚠️  Modifications locales détectées${NC}"
+    git status --short
+    
+    # Sauvegarder les modifications locales
+    echo -e "${BLUE}💾 Sauvegarde des modifications locales...${NC}"
+    git stash push -m "Auto-stash before deploy $(date +%Y%m%d_%H%M%S)" || true
+fi
+
+# Récupérer les dernières modifications
+git fetch origin main || {
+    echo -e "${RED}❌ Impossible de récupérer depuis Git${NC}"
+    exit 1
 }
+
+# Vérifier s'il y a des différences
+LOCAL=$(git rev-parse @ 2>/dev/null || echo "")
+REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "")
+BASE=$(git merge-base @ origin/main 2>/dev/null || echo "")
+
+if [ -z "$LOCAL" ] || [ -z "$REMOTE" ]; then
+    echo -e "${YELLOW}⚠️  Impossible de déterminer l'état Git, pull simple...${NC}"
+    git pull origin main || {
+        echo -e "${YELLOW}⚠️  Conflits Git détectés. Résolution...${NC}"
+        resolve_conflicts_simple
+    }
+elif [ "$LOCAL" = "$REMOTE" ]; then
+    echo -e "${GREEN}✅ Déjà à jour avec origin/main${NC}"
+elif [ "$LOCAL" = "$BASE" ]; then
+    echo -e "${BLUE}📥 Mise à jour nécessaire...${NC}"
+    git pull origin main || {
+        echo -e "${YELLOW}⚠️  Conflits détectés. Résolution...${NC}"
+        resolve_conflicts_simple
+    }
+else
+    echo -e "${YELLOW}⚠️  Branches divergentes détectées${NC}"
+    resolve_conflicts_simple
+fi
+
+# Restaurer les modifications locales si stash existe
+if git stash list | grep -q "Auto-stash before deploy"; then
+    echo -e "${BLUE}🔄 Restauration des modifications locales...${NC}"
+    git stash pop || {
+        echo -e "${YELLOW}⚠️  Conflits lors de la restauration du stash${NC}"
+        echo -e "${BLUE}💾 Modifications sauvegardées dans le stash${NC}"
+        git stash list
+    }
+fi
+
 echo -e "${GREEN}✅ Code mis à jour${NC}"
 echo ""
+
+# Fonction de résolution simple des conflits
+resolve_conflicts_simple() {
+    # Fichiers sûrs à écraser avec la version distante
+    SAFE_FILES=(
+        "frontend/package.json"
+        "frontend/package-lock.json"
+        "backend/requirements.txt"
+        "backend/requirements-production.txt"
+    )
+    
+    # Pour chaque fichier sûr, utiliser la version distante
+    for file in "${SAFE_FILES[@]}"; do
+        if [ -f "$file" ]; then
+            echo -e "${BLUE}📝 Résolution automatique de $file${NC}"
+            git checkout --theirs "$file" 2>/dev/null || true
+            git add "$file" 2>/dev/null || true
+        fi
+    done
+    
+    # Pour les fichiers .env, conserver la version locale
+    if [ -f "$BACKEND_DIR/.env" ]; then
+        echo -e "${BLUE}🔒 Conservation de la version locale de .env${NC}"
+        git checkout --ours "$BACKEND_DIR/.env" 2>/dev/null || true
+        git add "$BACKEND_DIR/.env" 2>/dev/null || true
+    fi
+    
+    # Finaliser le merge
+    git commit --no-edit || {
+        echo -e "${YELLOW}⚠️  Certains conflits nécessitent une résolution manuelle${NC}"
+        echo -e "${BLUE}💡 Exécutez 'git status' pour voir les détails${NC}"
+    }
+}
 
 # ============================================
 # ÉTAPE 2: Configuration Backend
@@ -209,15 +290,22 @@ echo ""
 echo -e "${BLUE}📋 Résumé:${NC}"
 echo "  - Frontend: http://foundation.newtiv.com"
 echo "  - API: http://foundation.newtiv.com/api"
-echo "  - Admin: http://foundation.newtiv.com/boss"
+echo "  - Admin Panel: http://foundation.newtiv.com/boss/ (ou /admin/ qui redirige)"
+echo "  - API Health: http://foundation.newtiv.com/api/health/"
+echo "  - Documentation: http://foundation.newtiv.com/api/docs/swagger/"
 echo ""
 echo -e "${BLUE}🔍 Vérifications:${NC}"
-echo "  1. Testez le site: curl http://foundation.newtiv.com"
-echo "  2. Testez l'API: curl http://foundation.newtiv.com/api/health/"
-echo "  3. Vérifiez les logs: sudo tail -f /var/log/nginx/foundation_error.log"
+echo "  1. Testez le site (domaine): curl http://foundation.newtiv.com"
+echo "  2. Testez le site (IP): curl http://91.108.120.78"
+echo "  3. Testez l'API (domaine): curl http://foundation.newtiv.com/api/health/"
+echo "  4. Testez l'API (IP): curl http://91.108.120.78/api/health/"
+echo "  5. Testez l'admin (domaine): curl http://foundation.newtiv.com/boss/"
+echo "  6. Testez l'admin (IP): curl http://91.108.120.78/boss/"
+echo "  7. Vérifiez les logs: sudo tail -f /var/log/nginx/foundation_error.log"
 echo ""
 echo -e "${YELLOW}⚠️  N'oubliez pas:${NC}"
 echo "  - Créer un superutilisateur: cd $BACKEND_DIR && python manage.py createsuperuser"
+echo "  - Accéder au panel admin: http://foundation.newtiv.com/boss/"
 echo "  - Configurer SSL avec Let's Encrypt (optionnel)"
 echo ""
 

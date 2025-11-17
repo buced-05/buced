@@ -104,6 +104,22 @@ server {
         add_header Cache-Control "public";
     }
 
+    # Panel administrateur Django à /boss
+    location /boss {
+        proxy_pass http://127.0.0.1:8000/admin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect /admin /boss;
+        proxy_redirect /admin/ /boss/;
+    }
+
+    # Redirection /admin vers /boss pour compatibilité
+    location = /admin {
+        return 301 /boss;
+    }
+
     location /api/ {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
@@ -201,6 +217,21 @@ RestartSec=10
 WantedBy=multi-user.target
 ```
 
+## URLs importantes
+
+Après le déploiement, les URLs suivantes sont disponibles :
+
+- **Frontend**: http://votre-domaine.com (ou http://91.108.120.78)
+- **API**: http://votre-domaine.com/api/v1/ (ou http://91.108.120.78/api/v1/)
+- **Panel Admin**: http://votre-domaine.com/boss/ (ou http://91.108.120.78/boss/)
+- **API Health**: http://votre-domaine.com/api/health/ (ou http://91.108.120.78/api/health/)
+- **Documentation API**: http://votre-domaine.com/api/docs/swagger/ (ou http://91.108.120.78/api/docs/swagger/)
+
+**Production VPS**:
+- **Domaine**: foundation.newtiv.com
+- **IP Publique**: 91.108.120.78
+- **SSH**: `ssh root@91.108.120.78`
+
 ## Commandes utiles
 
 ```bash
@@ -220,6 +251,12 @@ cd backend
 source ../venv/bin/activate
 ./scripts/deploy.sh
 sudo systemctl restart buced
+
+# Créer un superutilisateur Django
+cd /opt/buced/backend
+source ../venv/bin/activate
+python manage.py createsuperuser
+# Puis accéder à http://votre-domaine.com/boss/ pour vous connecter
 ```
 
 ## Sécurité

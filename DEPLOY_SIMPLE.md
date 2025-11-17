@@ -85,6 +85,22 @@ server {
         alias /root/buced/backend/media/;
     }
 
+    # Panel administrateur Django à /boss
+    location /boss {
+        proxy_pass http://127.0.0.1:8000/admin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect /admin /boss;
+        proxy_redirect /admin/ /boss/;
+    }
+
+    # Redirection /admin vers /boss pour compatibilité
+    location = /admin {
+        return 301 /boss;
+    }
+
     location /api/ {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
@@ -143,7 +159,8 @@ SECRET_KEY=votre-cle-secrete-tres-longue-et-aleatoire
 
 # Production
 DJANGO_DEBUG=0
-DJANGO_ALLOWED_HOSTS=votre-domaine.com,IP_DU_VPS
+DJANGO_ALLOWED_HOSTS=votre-domaine.com,91.108.120.78,localhost,127.0.0.1
+# Pour foundation.newtiv.com: foundation.newtiv.com,91.108.120.78,localhost,127.0.0.1
 
 # Base de données
 POSTGRES_HOST=localhost
@@ -152,7 +169,8 @@ POSTGRES_USER=buced_user
 POSTGRES_PASSWORD=votre_mot_de_passe
 
 # CORS
-DJANGO_CORS_ALLOWED_ORIGINS=https://votre-domaine.com
+DJANGO_CORS_ALLOWED_ORIGINS=https://votre-domaine.com,http://91.108.120.78
+# Pour foundation.newtiv.com: http://foundation.newtiv.com,https://foundation.newtiv.com,http://91.108.120.78,https://91.108.120.78
 ```
 
 ## Résolution des problèmes
@@ -176,6 +194,20 @@ python manage.py check
 python manage.py migrate
 ```
 
+## URLs disponibles
+
+Après le déploiement :
+
+- **API**: http://votre-domaine.com/api/v1/ (ou http://91.108.120.78/api/v1/)
+- **Panel Admin**: http://votre-domaine.com/boss/ (ou http://91.108.120.78/boss/)
+- **API Health**: http://votre-domaine.com/api/health/ (ou http://91.108.120.78/api/health/)
+- **Documentation**: http://votre-domaine.com/api/docs/swagger/ (ou http://91.108.120.78/api/docs/swagger/)
+
+**Production VPS**:
+- **Domaine**: foundation.newtiv.com
+- **IP Publique**: 91.108.120.78
+- **SSH**: `ssh root@91.108.120.78`
+
 ## Commandes utiles
 
 ```bash
@@ -194,5 +226,9 @@ source ../venv/bin/activate
 git pull
 ./scripts/deploy_production.sh
 sudo systemctl restart buced
+
+# Créer un superutilisateur Django
+python manage.py createsuperuser
+# Puis accéder à http://votre-domaine.com/boss/ pour vous connecter
 ```
 
